@@ -109,6 +109,40 @@
         PIXEL ART BY <a href="https://ansimuz.itch.io/gothicvania-patreon-collection" target="_blank" rel="noreferrer">LUIS ZUNO / ANSIMUZ</a> · CC0 <a href="assets/ansimuz/public-license.pdf" target="_blank">LICENSE</a>
       </p>
     </main>
+
+    <!-- Secure API Key Modal -->
+    <dialog id="api-key-modal" class="api-modal">
+      <div class="api-modal-box">
+        <header class="api-modal-header">
+          <h3>🔑 TYPESAFE AI CREDENTIALS</h3>
+          <button type="button" id="close-modal-btn" class="modal-close" aria-label="Close dialog">✕</button>
+        </header>
+        <div class="api-modal-body">
+          <div class="status-row">
+            <span class="status-label">CURRENT STATUS:</span>
+            <span id="key-status-badge" class="status-badge">CHECKING...</span>
+          </div>
+          <p class="modal-desc">
+            To query Jev decisions in real-time, provide your TypeSafe AI API key.
+            Your key is kept securely in your local browser session and is never exposed or logged.
+          </p>
+          <label for="api-key-input" class="modal-label">SET OR UPDATE KEY:</label>
+          <input
+            type="password"
+            id="api-key-input"
+            class="modal-input"
+            placeholder="Paste key here (hidden as ••••••)"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+        <footer class="api-modal-footer">
+          <button type="button" id="save-key-btn" class="modal-btn btn-save">SAVE KEY</button>
+          <button type="button" id="clear-key-btn" class="modal-btn btn-clear">REMOVE KEY</button>
+        </footer>
+      </div>
+    </dialog>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

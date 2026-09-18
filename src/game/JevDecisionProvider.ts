@@ -3,8 +3,6 @@ import type { DecisionProvider, EnemyAction, GameState, JevDecision } from './ty
 
 const ACTIONS = ['ATTACK', 'DODGE', 'BLOCK', 'RETREAT'] as const;
 
-export const DEFAULT_FALLBACK_KEY = 'apikey_262a889e5dc01af4f7fb7284ce8822fc37e_4643bea5fec137e29c28fe4bbd973951b7e353d4730c676a5cc35837ef4bba9f';
-
 export function getActiveApiKey(): string {
   if (typeof window !== 'undefined') {
     const customKey = localStorage.getItem('TYPESAFE_API_KEY');
@@ -14,7 +12,11 @@ export function getActiveApiKey(): string {
   const envKey = import.meta.env.VITE_TYPESAFE_API_KEY as string | undefined;
   if (envKey && envKey.trim()) return envKey.trim();
 
-  return DEFAULT_FALLBACK_KEY;
+  return '';
+}
+
+export function isApiKeyConfigured(): boolean {
+  return Boolean(getActiveApiKey());
 }
 
 /**
@@ -25,6 +27,9 @@ export function getActiveApiKey(): string {
 export class JevDecisionProvider implements DecisionProvider {
   private getClient(): TypeSafeClient {
     const apiKey = getActiveApiKey();
+    if (!apiKey) {
+      throw new Error('TypeSafe API Key is not configured. Click "🔑 KEY" in the header to enter your key.');
+    }
     const baseURL = typeof window !== 'undefined' && window.location?.origin
       ? `${window.location.origin}/api-typesafe`
       : '/api-typesafe';

@@ -5,7 +5,7 @@ import { RoomTwoScene } from './scenes/RoomTwoScene';
 import { RoomThreeScene } from './scenes/RoomThreeScene';
 import { toggleSound, unlockAudio } from './game/sound';
 import { setVirtualKey } from './game/virtualInput';
-import { getActiveApiKey } from './game/JevDecisionProvider';
+import { isApiKeyConfigured } from './game/JevDecisionProvider';
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -40,19 +40,59 @@ if (soundBtn) {
   });
 }
 
-// API Key management button (useful for deployed Vercel previews)
+// API Key management modal (securely handled, key value is NEVER displayed or alerted)
 const apiKeyBtn = document.querySelector<HTMLButtonElement>('#api-key-btn');
-if (apiKeyBtn) {
+const apiKeyModal = document.querySelector<HTMLDialogElement>('#api-key-modal');
+const closeModalBtn = document.querySelector<HTMLButtonElement>('#close-modal-btn');
+const saveKeyBtn = document.querySelector<HTMLButtonElement>('#save-key-btn');
+const clearKeyBtn = document.querySelector<HTMLButtonElement>('#clear-key-btn');
+const keyStatusBadge = document.querySelector<HTMLElement>('#key-status-badge');
+const keyInput = document.querySelector<HTMLInputElement>('#api-key-input');
+
+function updateKeyStatusBadge(): void {
+  if (!keyStatusBadge) return;
+  const configured = isApiKeyConfigured();
+  keyStatusBadge.textContent = configured ? 'CONFIGURED & ACTIVE' : 'NOT CONFIGURED';
+  keyStatusBadge.className = `status-badge ${configured ? 'active' : 'missing'}`;
+}
+
+if (apiKeyBtn && apiKeyModal) {
   apiKeyBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    const current = getActiveApiKey();
-    const masked = current ? `${current.slice(0, 10)}...${current.slice(-6)}` : 'None';
-    const input = window.prompt(`Enter your TypeSafe AI API key:\n(Currently: ${masked})\nLeave blank to keep current key.`, '');
-    if (input !== null && input.trim()) {
-      localStorage.setItem('TYPESAFE_API_KEY', input.trim());
-      window.alert('TypeSafe API Key saved! Refreshing page to apply.');
-      window.location.reload();
+    updateKeyStatusBadge();
+    if (keyInput) keyInput.value = '';
+    apiKeyModal.showModal();
+  });
+
+  closeModalBtn?.addEventListener('click', () => {
+    if (keyInput) keyInput.value = '';
+    apiKeyModal.close();
+  });
+
+  apiKeyModal.addEventListener('click', (e) => {
+    if (e.target === apiKeyModal) {
+      if (keyInput) keyInput.value = '';
+      apiKeyModal.close();
     }
+  });
+
+  saveKeyBtn?.addEventListener('click', () => {
+    const val = keyInput?.value?.trim();
+    if (val) {
+      localStorage.setItem('TYPESAFE_API_KEY', val);
+      if (keyInput) keyInput.value = '';
+      apiKeyModal.close();
+      window.location.reload();
+    } else {
+      apiKeyModal.close();
+    }
+  });
+
+  clearKeyBtn?.addEventListener('click', () => {
+    localStorage.removeItem('TYPESAFE_API_KEY');
+    if (keyInput) keyInput.value = '';
+    apiKeyModal.close();
+    window.location.reload();
   });
 }
 
