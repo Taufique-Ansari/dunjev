@@ -1,3 +1,4 @@
+<img width="390" height="292" alt="Screenshot 2026-09-18 at 12 13 37 PM" src="https://github.com/user-attachments/assets/7306caad-ab0c-4eb6-8306-949cd812c197" />
 # Jev Dungeon — The Wayfarer
 
 A fast-paced, three-act side-scrolling 2D fantasy brawler built with **Phaser 3**, **TypeScript**, and **Vite** designed to test and showcase **Jev (TypeSafe AI System One)** real-time decision-making in action.
