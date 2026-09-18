@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#0d1b12" />
+    <title>Jev Dungeon — The Wayfarer</title>
+  </head>
+  <body>
+    <main id="app">
+      <header class="masthead">
+        <div>
+          <span class="eyebrow">A THREE-ACT ARCADE ADVENTURE</span>
+          <h1>JEV DUNGEON<span>THE WAYFARER</span></h1>
+        </div>
+        <span class="edition">ART EDITION <small>01 / 2026</small></span>
+      </header>
+
+      <div class="arena-layout">
+        <!-- LEFT: GAME CABINET -->
+        <section class="cabinet" aria-label="Jev Dungeon game">
+          <header class="title-bar">
+            <span><i></i> ONE PLAYER · FREE PLAY</span>
+            <div class="title-bar-actions">
+              <button type="button" id="sound-toggle" class="sound-btn" aria-label="Toggle Sound" title="Toggle Sound">🔊</button>
+              <span id="room-label">ACT 01 / 03</span>
+            </div>
+          </header>
+
+          <div id="game" aria-label="Dungeon game canvas"></div>
+
+          <!-- Touch controls for mobile screen -->
+          <div class="touch-gamepad" id="touch-gamepad" aria-label="Mobile touch controls">
+            <div class="dpad-cluster">
+              <button type="button" class="pad-btn pad-up" data-key="ArrowUp" aria-label="Up">▲</button>
+              <div class="dpad-horizontal">
+                <button type="button" class="pad-btn pad-left" data-key="ArrowLeft" aria-label="Left">◀</button>
+                <div class="pad-center"></div>
+                <button type="button" class="pad-btn pad-right" data-key="ArrowRight" aria-label="Right">▶</button>
+              </div>
+              <button type="button" class="pad-btn pad-down" data-key="ArrowDown" aria-label="Down">▼</button>
+            </div>
+
+            <div class="action-cluster">
+              <button type="button" class="touch-btn btn-evade" data-key="Shift" aria-label="Evade">
+                <span class="btn-title">EVADE</span>
+                <span class="btn-sub">SHIFT</span>
+              </button>
+              <button type="button" class="touch-btn btn-attack" data-key=" " aria-label="Attack">
+                <span class="btn-title">ATTACK</span>
+                <span class="btn-sub">SPACE</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Desktop controls hint bar -->
+          <footer class="controls desktop-controls">
+            MOVE <kbd>WASD / ARROWS</kbd>
+            <span>ATTACK <kbd>SPACE</kbd></span>
+            <span>EVADE <kbd>SHIFT</kbd></span>
+            <span>NEXT <kbd>N</kbd></span>
+            <span>RETRY <kbd>R</kbd></span>
+          </footer>
+        </section>
+
+        <!-- RIGHT: JEV DECISION & PROBABILITY ANALYSIS PANEL -->
+        <aside class="telemetry" aria-live="polite">
+          <div class="telemetry-card">
+            <div class="hud-header">
+              <div class="hud-title">JEV DECISION ENGINE <span class="live-dot"></span></div>
+              <p class="hud-note">LIVE · JEV SYSTEM ONE</p>
+            </div>
+
+            <div class="status-grid">
+              <div class="status"><span>PROVIDER</span><strong id="provider">JEV / TYPESAFE</strong></div>
+              <div class="status"><span>MODE</span><strong id="mode">REACTIVE</strong></div>
+              <div class="status"><span>LATENCY</span><strong id="latency">-- ms</strong></div>
+              <div class="status"><span>THINKING</span><strong id="thinking">STANDBY</strong></div>
+            </div>
+
+            <div class="telemetry-section-title">LIVE PROBABILITIES</div>
+            <div class="decision-list" id="decision-list"></div>
+            <div class="selected" id="selected-action">SCANNING...</div>
+          </div>
+
+          <div class="history-card">
+            <div class="history-header">
+              <span class="history-title">GAME DECISION HISTORY</span>
+              <span class="history-badge"><span id="log-count">0</span> CHOICES</span>
+            </div>
+            <div class="decision-log" id="decision-log">
+              <div class="log-empty-state">Waiting for combat encounters... Jev decisions will stream here live.</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="chapter-row">
+        <span>EXPLORE THE CHAPTERS</span>
+        <nav aria-label="Choose a room">
+          <button data-room="room-one">01 · CAUSEWAY</button>
+          <button data-room="room-two">02 · GREAT HALL</button>
+          <button data-room="room-three">03 · DRAGON</button>
+        </nav>
+      </div>
+
+      <p class="credits">
+        PIXEL ART BY <a href="https://ansimuz.itch.io/gothicvania-patreon-collection" target="_blank" rel="noreferrer">LUIS ZUNO / ANSIMUZ</a> · CC0 <a href="assets/ansimuz/public-license.pdf" target="_blank">LICENSE</a>
+      </p>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
