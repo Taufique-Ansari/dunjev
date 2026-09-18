@@ -1,3 +1,4 @@
+import { inject } from '@vercel/analytics';
 import Phaser from 'phaser';
 import './style.css';
 import { RoomOneScene } from './scenes/RoomOneScene';
@@ -6,6 +7,9 @@ import { RoomThreeScene } from './scenes/RoomThreeScene';
 import { toggleSound, unlockAudio } from './game/sound';
 import { setVirtualKey } from './game/virtualInput';
 import { isApiKeyConfigured } from './game/JevDecisionProvider';
+
+// Initialize Vercel Analytics
+inject();
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
