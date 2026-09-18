@@ -3,6 +3,9 @@ import './style.css';
 import { RoomOneScene } from './scenes/RoomOneScene';
 import { RoomTwoScene } from './scenes/RoomTwoScene';
 import { RoomThreeScene } from './scenes/RoomThreeScene';
+import { toggleSound, unlockAudio } from './game/sound';
+import { setVirtualKey } from './game/virtualInput';
+import { getActiveApiKey } from './game/JevDecisionProvider';
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -17,8 +20,6 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
 });
 
-import { toggleSound, unlockAudio } from './game/sound';
-
 document.querySelectorAll<HTMLButtonElement>('[data-room]').forEach(button => {
   button.addEventListener('click', () => {
     unlockAudio();
@@ -28,6 +29,7 @@ document.querySelectorAll<HTMLButtonElement>('[data-room]').forEach(button => {
   });
 });
 
+// Sound toggle button
 const soundBtn = document.querySelector<HTMLButtonElement>('#sound-toggle');
 if (soundBtn) {
   soundBtn.addEventListener('click', (e) => {
@@ -38,24 +40,39 @@ if (soundBtn) {
   });
 }
 
+// API Key management button (useful for deployed Vercel previews)
+const apiKeyBtn = document.querySelector<HTMLButtonElement>('#api-key-btn');
+if (apiKeyBtn) {
+  apiKeyBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const current = getActiveApiKey();
+    const masked = current ? `${current.slice(0, 10)}...${current.slice(-6)}` : 'None';
+    const input = window.prompt(`Enter your TypeSafe AI API key:\n(Currently: ${masked})\nLeave blank to keep current key.`, '');
+    if (input !== null && input.trim()) {
+      localStorage.setItem('TYPESAFE_API_KEY', input.trim());
+      window.alert('TypeSafe API Key saved! Refreshing page to apply.');
+      window.location.reload();
+    }
+  });
+}
+
 // Global unlock on first user gesture
 window.addEventListener('pointerdown', unlockAudio, { once: true });
 window.addEventListener('keydown', unlockAudio, { once: true });
 
-// Bind Gameboy virtual touch/click buttons to keyboard events
+// Bind virtual touch/click buttons to virtualInput state & keyboard events
 function bindVirtualKey(button: HTMLElement, key: string): void {
-  const code = key === ' ' ? 'Space' : key.startsWith('Arrow') ? key : key.length === 1 ? `Key${key.toUpperCase()}` : key;
-
   const triggerDown = (e: Event) => {
     e.preventDefault();
+    unlockAudio();
     button.classList.add('pressed');
-    window.dispatchEvent(new KeyboardEvent('keydown', { key, code, bubbles: true }));
+    setVirtualKey(key, true);
   };
 
   const triggerUp = (e: Event) => {
     e.preventDefault();
     button.classList.remove('pressed');
-    window.dispatchEvent(new KeyboardEvent('keyup', { key, code, bubbles: true }));
+    setVirtualKey(key, false);
   };
 
   button.addEventListener('touchstart', triggerDown, { passive: false });

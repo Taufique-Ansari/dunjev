@@ -5,6 +5,7 @@ import { animateArt, fighters, loadArt, playPose } from '../game/art';
 import type { FighterKind } from '../game/art';
 import { TelemetryHud } from '../ui/TelemetryHud';
 import { unlockAudio, playSlash, playHit, playBlock, playEvade, playDragonBreath, playVictory, playDefeat } from '../game/sound';
+import { virtualInput } from '../game/virtualInput';
 
 interface RoomConfig { room: number; title: string; intro: string; enemies: { kind: string; x: number; y: number; hp: number }[]; walls: number[][]; next?: string; }
 interface Actor {
@@ -66,22 +67,48 @@ export abstract class CombatRoomScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number): void {
-    if (Phaser.Input.Keyboard.JustDown(this.keys.R)) { this.scene.restart(); return; }
-    if (this.status === 'ready') { if (Phaser.Input.Keyboard.JustDown(this.keys.ENTER)) this.begin(); return; }
-    if (this.status !== 'playing') { if (this.status === 'won' && this.room.next && Phaser.Input.Keyboard.JustDown(this.keys.N)) this.scene.start(this.room.next); return; }
+    if (Phaser.Input.Keyboard.JustDown(this.keys.R) || virtualInput.retry) {
+      virtualInput.retry = false;
+      this.scene.restart();
+      return;
+    }
+    if (this.status === 'ready') {
+      if (Phaser.Input.Keyboard.JustDown(this.keys.ENTER) || virtualInput.start) {
+        virtualInput.start = false;
+        this.begin();
+        return;
+      }
+    }
+    if (this.status !== 'playing') {
+      if (this.status === 'won' && this.room.next && (Phaser.Input.Keyboard.JustDown(this.keys.N) || virtualInput.next)) {
+        virtualInput.next = false;
+        this.scene.start(this.room.next);
+      }
+      return;
+    }
     const dt = Math.min(delta, 40) / 1000;
     if (time >= this.player.busyUntil) {
-      const x = Number(this.keys.D.isDown || this.keys.RIGHT.isDown) - Number(this.keys.A.isDown || this.keys.LEFT.isDown);
-      const y = Number(this.keys.S.isDown || this.keys.DOWN.isDown) - Number(this.keys.W.isDown || this.keys.UP.isDown);
+      const left = this.keys.A.isDown || this.keys.LEFT.isDown || virtualInput.left;
+      const right = this.keys.D.isDown || this.keys.RIGHT.isDown || virtualInput.right;
+      const up = this.keys.W.isDown || this.keys.UP.isDown || virtualInput.up;
+      const down = this.keys.S.isDown || this.keys.DOWN.isDown || virtualInput.down;
+      const x = Number(right) - Number(left);
+      const y = Number(down) - Number(up);
       if (x) this.player.facing = x;
       this.move(this.player, x * 200 * dt, y * 85 * dt);
       playPose(this.player.sprite, 'hero', x || y ? 'walk' : 'idle');
-      if (Phaser.Input.Keyboard.JustDown(this.keys.SHIFT)) {
+
+      const doEvade = Phaser.Input.Keyboard.JustDown(this.keys.SHIFT) || virtualInput.justEvaded;
+      virtualInput.justEvaded = false;
+
+      if (doEvade) {
         playEvade();
         this.player.invulnerableUntil = time + 320; this.player.busyUntil = time + 240;
         this.move(this.player, this.player.facing * 88, 0); this.player.sprite.setAlpha(.5);
         this.time.delayedCall(280, () => this.player.sprite.setAlpha(1));
-      } else if (this.keys.SPACE.isDown && time >= this.player.nextAttack) this.swing(this.player, time);
+      } else if ((this.keys.SPACE.isDown || virtualInput.attack) && time >= this.player.nextAttack) {
+        this.swing(this.player, time);
+      }
     }
     for (const enemy of this.enemies) this.updateEnemy(enemy, time, dt);
     if (time - this.lastDecision > 650 && !this.pending) void this.decide(time);
@@ -213,8 +240,18 @@ export abstract class CombatRoomScene extends Phaser.Scene {
       const decision = await this.provider.decide(state);
       if (generation !== this.generation || this.status !== 'playing') return;
       leader.action = decision.action; this.hud.update(decision);
-    } catch { if (generation === this.generation) this.hud.stopped('RETRYING'); }
-    finally { if (generation === this.generation) this.pending = false; }
+    } catch (err) {
+      console.error('[CombatRoomScene] Jev decide error:', err);
+      if (generation === this.generation) {
+        this.hud.stopped('API ERROR');
+        const selected = document.querySelector('#selected-action');
+        if (selected) {
+          selected.textContent = `⚠️ Jev API Error: Check Vercel rewrite or key`;
+        }
+      }
+    } finally {
+      if (generation === this.generation) this.pending = false;
+    }
   }
 
   private finish(won: boolean): void {
